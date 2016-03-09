@@ -1,6 +1,6 @@
 var express = require("express");//web server host
 var bodyParser = require("body-parser");//middleware
-var _ = require("underscore");//refactoring helper
+var _ = require("underscore");//refactoring helper class
 
 var app = express();
 var PORT = process.env.PORT || 3000;//uses port 3000 for local purposes or the natural port for heroku, etc.
@@ -46,6 +46,16 @@ app.post("/todos", function (req, res) {
 
   body.id = todoNextId++;
   todos.push(body);
+  res.json(body);
+});
+
+// delete /todos/:id
+
+//I HAVE STOPPED HERE - 3:19 video 7, 58
+app.delete("/todos/:id", function (req, res) {
+  var todoId = parseInt(req.params.id, 10);
+  var matchedTodo = _.findWhere(todos, {id: todoId});
+  todos = _.without(todos, matchedTodo);
   res.json(body);
 });
 
