@@ -2,13 +2,12 @@ var express = require("express");//web server host
 var bodyParser = require("body-parser");//middleware
 var _ = require("underscore");//refactoring helper class
 
-var app = express();
+var app = express();//setting up the app for express
 var PORT = process.env.PORT || 3000;//uses port 3000 for local purposes or the natural port for heroku, etc.
 var todos = [];//the array of todo items
 var todoNextId = 1;//the id of the todo items starts at 1
 
-app.use(bodyParser.json());
-
+app.use(bodyParser.json());//parse the application and use JSON
 
 //returns all todos
 app.get("/", function (req, res) {
@@ -51,7 +50,7 @@ app.post("/todos", function (req, res) {
 
 // delete /todos/:id
 
-//I HAVE STOPPED HERE - 3:19 video 7, 58
+//stop - 3:19 video 7, 58
 app.delete("/todos/:id", function (req, res) {
   var todoId = parseInt(req.params.id, 10);
   var matchedTodo = _.findWhere(todos, {id: todoId});
