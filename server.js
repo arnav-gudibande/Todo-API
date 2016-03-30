@@ -1,28 +1,24 @@
-var express = require("express");//web server host
-var bodyParser = require("body-parser");//middleware
-var _ = require("underscore");//refactoring helper class
+var express = require("express");
+var bodyParser = require("body-parser");
+var _ = require("underscore");
+var app = express();
+var PORT = process.env.PORT || 3000;
+var todos = [];
+var todoNextId = 1;
 
-var app = express();//setting up the app for express
-var PORT = process.env.PORT || 3000;//uses port 3000 for local purposes or the natural port for heroku, etc.
-var todos = [];//the array of todo items
-var todoNextId = 1;//the id of the todo items starts at 1
+app.use(bodyParser.json());
 
-app.use(bodyParser.json());//parse the application and use JSON
-
-//returns all todos
 app.get("/", function (req, res) {
-  res.send("Todo API Root");//home page
+  res.send("Todo API Root");
 });
 
 app.get("/todos", function (req, res) {
-  res.json(todos);//returns all the items in the todos array
+  res.json(todos);
 });
 
-
-//returns todo corresponding to id
 app.get("/todos/:id", function (req, res) {
-  var todoId = parseInt(req.params.id, 10);//params.id is the id of the todo that is passed in through the url
-  var matchedTodo = _.findWhere(todos, {id: todoId});//returns the todo object with the corresponding id number
+  var todoId = parseInt(req.params.id, 10);
+  var matchedTodo = _.findWhere(todos, {id: todoId});
 
   if(matchedTodo) {
     res.json(matchedTodo);
@@ -31,28 +27,21 @@ app.get("/todos/:id", function (req, res) {
   }
 });
 
-//user can add todos onto the list
 app.post("/todos", function (req, res) {
-  var body = _.pick(req.body, "description", "completed");//filters the req JSON for only its description and completed fields
+  var body = _.pick(req.body, "description", "completed");
 
-  //data validation
   if((!_.isBoolean(body.completed)) || (!_.isString(body.description)) || (body.description.trim().length === 0)) {
     return res.status(400).send();
   }
 
-  body.description = body.description.trim();//trims the value of description, gets rid of unneccessary spaces
-
-  //at this point, the JSON is fully trimmed and filtered for only the neccessary information
-
+  body.description = body.description.trim();
   body.id = todoNextId++;
   todos.push(body);
   res.json(body);
 });
 
-// delete /todos/:id
-
 app.delete("/todos/:id", function (req, res) {
-  var todoId = parseInt(req.params.id, 10);//fetches the id of the todo that needs to be deleted
+  var todoId = parseInt(req.params.id, 10);
   var matchedTodo = _.findWhere(todos, {id: todoId});
   if(!matchedTodo) {
     res.status(404).json({"error": "no todo found with that id"});
@@ -62,7 +51,32 @@ app.delete("/todos/:id", function (req, res) {
   }
 });
 
-//sets the app to listen on port 3000
+app.put("/todos/:id", function (req, res) {
+  var todoId = parseInt(req.params.id, 10);
+  var matchedTodo = _.findWhere(todos, {id: todoId});
+  var body = _.pick(req.body, "description", "completed");
+  var validAttributes = {};
+
+  if(!matchedTodo) {
+    return res.status(404).send();
+  }
+
+  if(body.hasOwnProperty("completed") && _.isBoolean(body.completed)) {
+    validAttributes.completed = body.completed;
+  } else if (body.hasOwnProperty("completed")) {
+    return res.status(400).send();
+  }
+
+  if(body.hasOwnProperty("description") && _.isString(body.description) && (body.description.trim().length > 0)) {
+    validAttributes.description = body.description;
+  } else if (body.hasOwnProperty("description")) {
+    return res.status(400).send();
+  }
+
+  _.extend(matchedTodo, validAttributes);
+  res.json(matchedTodo);
+});
+
 app.listen(PORT, function () {
   console.log("Express listening on Port "+PORT);
 });
