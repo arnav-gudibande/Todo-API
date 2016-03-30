@@ -18,6 +18,7 @@ app.get("/todos", function (req, res) {
   res.json(todos);//returns all the items in the todos array
 });
 
+
 //returns todo corresponding to id
 app.get("/todos/:id", function (req, res) {
   var todoId = parseInt(req.params.id, 10);//params.id is the id of the todo that is passed in through the url
@@ -50,12 +51,15 @@ app.post("/todos", function (req, res) {
 
 // delete /todos/:id
 
-//stop - 3:19 video 7, 58
 app.delete("/todos/:id", function (req, res) {
-  var todoId = parseInt(req.params.id, 10);
+  var todoId = parseInt(req.params.id, 10);//fetches the id of the todo that needs to be deleted
   var matchedTodo = _.findWhere(todos, {id: todoId});
-  todos = _.without(todos, matchedTodo);
-  res.json(body);
+  if(!matchedTodo) {
+    res.status(404).json({"error": "no todo found with that id"});
+  } else {
+    todos = _.without(todos, matchedTodo);
+    res.json(matchedTodo);
+  }
 });
 
 //sets the app to listen on port 3000
